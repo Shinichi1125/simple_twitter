@@ -25,6 +25,9 @@
       <div class="filter">
         <div><textarea rows = "1" cols = "40" v-model="searchString" placeholder="search by keyword">  </textarea> </div>
         <div><button @click="filterKweets()">Search</button></div>
+        <p v-if="searchFound && filteredJson.length == 1"> {{ filteredJson.length }} kweet found for "{{ searchString }}".</p>
+        <p v-else-if="searchFound && filteredJson.length > 0"> {{ filteredJson.length }} kweets found for "{{ searchString }}".</p>
+        <p v-if="searchFailed" style="color:red;">No match found for "{{ searchString }}"</p>
       </div>
       
       <div class = "userContainer">
@@ -71,6 +74,7 @@ export default {
     return {
       searchString: '',
       filtered: false,
+      searchFailed: false,
       allJsonData: [],
       filteredJson: [],
       searchFound: false,
@@ -100,8 +104,15 @@ export default {
   created() {
     this.loadPage();
   },
+  watch:{
+    searchString(){
+      this.searchFailed = false; 
+      this.searchFound = false; 
+    }
+  },
   methods: {
     loadPage(){
+      console.log('loadPage got called!');
       var self = this;     
       fetch('/feed.json').then(function(response){     //    "/feed.json"      //   http://localhost:3000/api/feed/get
         return response.json();
@@ -122,6 +133,7 @@ export default {
       });
       self.pageLoaded = true; 
       self.searchFound = false; 
+      console.log('The end of loadPage');
     },  
     setAllJsonData(json){
       this.allJsonData = json;
@@ -157,12 +169,19 @@ export default {
       this.userJSON.kweetId++;
     },
     filterKweets(){
+      console.log('filterKweets got called!');
       this.loadPage();
+      console.log('Continuing with filterKweets...');
       var self = this;
       var keyword = self.searchString;
       var found = false;
       
       self.filteredJson = [];
+
+      if(self.searchString == ''){
+        console.log('getting out of filterKweets...');
+        return;
+      }
       
       for(var i = 0; i < self.allJsonData.length; i++){ 
         if(self.allJsonData[i].username.includes(keyword)){
@@ -182,9 +201,15 @@ export default {
       }
       if(self.filteredJson.length > 0){
         self.searchFound = true;
+        self.searchFailed = false;
       } else {
         self.searchFound = false; 
+        self.searchFailed = true; 
       }
+      console.log('The end of filterKweets');
+      console.log('The search keyword is ' + keyword);
+      console.log('The filtered kweets are...');
+      console.log(self.filteredJson);
     }
   }
 }
@@ -201,6 +226,10 @@ export default {
   text-align: right;
   width: 125%;
   margin-bottom: 10px;
+}
+
+.filter p {
+  text-align: right;
 }
 
 
