@@ -1,7 +1,6 @@
 <template>
   <div>
-    <div v-for="JsonData in allJsonData">   
-  <!--  <div v-for="JsonData in visibleKweets">  -->
+    <div v-for="JsonData in filteredJson">   
         <article>
           <div class = "container">          
             <div class = "div1">
@@ -27,7 +26,7 @@
                 <br> <br>
             </div>
 
-            <div v-if="JsonData.media && JsonData.media.type == 'youtube' && JsonData.media.url != ''">  <!--  && url != JsonData.media.url" -->
+            <div v-if="JsonData.media && JsonData.media.type == 'youtube' && JsonData.media.url != ''">  
               <youtube :video-id="getYoutubeURL(JsonData.media.url)"></youtube>    
               <br> <br>
             </div>
@@ -51,51 +50,27 @@
 
       </div>
     
-  <!--    <pagination
-        v-bind:allJsonData="allJsonData"
-        v-on:page:update="updatePage"
-        v-bind:currentPage="currentPage"
-        v-bind:pageSize="pageSize">
-      </pagination>    -->
   </div>  
 </template>
 
 <script>
 import Media from '../../node_modules/@dongido/vue-viaudio';
-import { getIdFromURL } from '../../node_modules/vue-youtube-embed';
-
-//import Pagination from './Pagination.vue'　
+import { getIdFromURL } from '../../node_modules/vue-youtube-embed';　
 
 export default {
     props:{
-        allJsonData: Array,
+        filteredJson: Array,
         userId: Number
     },  
     components:{
         Media: Media,
-  //      pagination: Pagination
     },
     data(){
       return {
         videoId: null,
         url: ''
-    /*    currentPage: 0,
-        pageSize: 3,
-        visibleKweets: []  */
       }  
     },
-  /*  computed: {
-      getYoutubeURL(){
-        this.videoId = this.$youtube.getIdFromURL(this.url);
-        return this.videoId; 
-      } 
-    },  */
- /*   created(){
-      this.updateVisibleKweets();
-    },
-    beforeMount: function() {
-      this.updateVisibleKweets();
-    },  */
     methods:{
       updateAction(JsonData, reactionType){     
         JsonData.reactionType = reactionType;
@@ -152,25 +127,7 @@ export default {
 
         let videoId = this.$youtube.getIdFromURL(url);
         return videoId;
-
-      //  this.videoId = this.$youtube.getIdFromURL(url);
-      //  return this.videoId; 
       }   
- /*     updatePage(pageNumber) {
-        this.currentPage = pageNumber;
-        this.updateVisibleKweets();
-      },
-      updateVisibleKweets() {
-        this.visibleKweets = this.allJsonData.slice(this.currentPage * this.pageSize, (this.currentPage * this.pageSize) + this.pageSize);
-
-        console.log('The content of visible kweets');
-        console.log(this.visibleKweets);
-
-        // if we have 0 visible todos, go back a page
-        if (this.visibleKweets.length == 0 && this.currentPage > 0) {
-          this.updatePage(this.currentPage -1);
-        }  
-      }  */
     }   
 }
 </script>
@@ -184,8 +141,4 @@ export default {
   background-color: yellow;
 }
 
-.pagination li{
-  list-style-type: none;
-  float: left;
-}
 </style>

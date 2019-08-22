@@ -21,8 +21,12 @@
         </div>
       </div>
       <br>
-
-      <p>Vad händer?</p>
+      
+      <div class="filter">
+        <div><textarea rows = "1" cols = "40" v-model="searchString" placeholder="search by keyword">  </textarea> </div>
+        <div><button @click="filterKweets()">Search</button></div>
+      </div>
+      
       <div class = "userContainer">
         <form >
           <div class = "user-avatar">  
@@ -42,30 +46,34 @@
 
     <br><br>
 
-    <div v-if="pageLoaded">   
+    <div v-if="pageLoaded && !searchFound">   
       <show-previous-kweets v-bind:allJsonData="allJsonData" v-bind:userId="userJSON.userId" @updated="loadPage"></show-previous-kweets>
-    <!--  <v-pagination v-model="currentPage" :page-count="allJsonData.length" ></v-pagination>  -->
     </div>
   <!--  <router-view></router-view>     -->
+    
+    <div v-if="pageLoaded && searchFound">
+      <show-filtered-kweets v-bind:filteredJson="filteredJson" v-bind:userId="userJSON.userId" @updated="loadPage"></show-filtered-kweets>
+    </div>
 
   </div>
 </template>
 
 <script>
 import ShowPreviousKweets from './components/ShowPreviousKweets';
-//import vPagination from '../node_modules/vue-plain-pagination';
-//import Pagination from './Pagination.vue';
+import ShowFilteredKweets from './components/ShowFilteredKweets';
 
 export default {
   components: {
     'show-previous-kweets': ShowPreviousKweets,
-  //  'v-pagination': vPagination
-  //  'pagination': Pagination
+    'show-filtered-kweets': ShowFilteredKweets
   },
   data(){
     return {
-      currentPage: 1,
+      searchString: '',
+      filtered: false,
       allJsonData: [],
+      filteredJson: [],
+      searchFound: false,
       pageLoaded: false,
       kweetInput: '',
       userJSON: {
@@ -113,6 +121,7 @@ export default {
         self.setAllJsonData(self.allJsonData);
       });
       self.pageLoaded = true; 
+      self.searchFound = false; 
     },  
     setAllJsonData(json){
       this.allJsonData = json;
@@ -146,6 +155,36 @@ export default {
       self.kweetInput = '';
       this.loadPage();
       this.userJSON.kweetId++;
+    },
+    filterKweets(){
+      this.loadPage();
+      var self = this;
+      var keyword = self.searchString;
+      var found = false;
+      
+      self.filteredJson = [];
+      
+      for(var i = 0; i < self.allJsonData.length; i++){ 
+        if(self.allJsonData[i].username.includes(keyword)){
+          found = true;
+        }
+        if(self.allJsonData[i].handle.includes(keyword)){
+          found = true;
+        }     
+        if(self.allJsonData[i].content.includes(keyword)){
+          found = true;
+        }
+
+        if(found){
+          self.filteredJson.push(self.allJsonData[i]);
+        }
+        found = false; 
+      }
+      if(self.filteredJson.length > 0){
+        self.searchFound = true;
+      } else {
+        self.searchFound = false; 
+      }
     }
   }
 }
@@ -157,4 +196,16 @@ export default {
   background-color: lightblue;
   margin-left: 3px;
 }
+
+.filter {
+  text-align: right;
+  width: 125%;
+  margin-bottom: 10px;
+}
+
+
+
+
+
+
 </style>
