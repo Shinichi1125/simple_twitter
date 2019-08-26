@@ -55,7 +55,7 @@
   <!--  <router-view></router-view>     -->
     
     <div v-if="pageLoaded && searchFound">
-      <show-filtered-kweets v-bind:filteredJson="filteredJson" v-bind:userId="userJSON.userId" @updated="loadPage"></show-filtered-kweets>
+      <show-filtered-kweets v-bind:filteredJson="filteredJson" v-bind:userId="userJSON.userId" @updated="filterKweets"></show-filtered-kweets>
     </div>
 
   </div>
@@ -73,7 +73,7 @@ export default {
   data(){
     return {
       searchString: '',
-      filtered: false,
+    //  filtered: false,
       searchFailed: false,
       allJsonData: [],
       filteredJson: [],
@@ -111,13 +111,14 @@ export default {
     }
   },
   methods: {
-    loadPage(){
+    async loadPage(){
       console.log('loadPage got called!');
-      var self = this;     
-      fetch('/feed.json').then(function(response){     //    "/feed.json"      //   http://localhost:3000/api/feed/get
+      var self = this;  
+      console.log('Right before fetching JSON by loadPage...');   
+      await fetch('/feed.json').then(function(response){     //    "/feed.json"      //   http://localhost:3000/api/feed/get
         return response.json();
       }).then(function(response){
-
+        console.log('The beginning of handling the response of loadPage...');
         var tempArray = [];
         for(var i = 0; i < response.length; i++){
           tempArray.push(response[i]);
@@ -130,10 +131,11 @@ export default {
 
         self.allJsonData = reversedArray;
         self.setAllJsonData(self.allJsonData);
+        console.log('JSON data updated');
       });
       self.pageLoaded = true; 
       self.searchFound = false; 
-      console.log('The end of loadPage');
+      console.log('The end of loadPage');  
     },  
     setAllJsonData(json){
       this.allJsonData = json;
@@ -168,11 +170,12 @@ export default {
       this.loadPage();
       this.userJSON.kweetId++;
     },
-    filterKweets(){
+    async filterKweets(){
       console.log('filterKweets got called!');
-      this.loadPage();
-      console.log('Continuing with filterKweets...');
       var self = this;
+      await self.loadPage();
+      console.log('Continuing with filterKweets...');
+      
       var keyword = self.searchString;
       var found = false;
       
@@ -231,10 +234,5 @@ export default {
 .filter p {
   text-align: right;
 }
-
-
-
-
-
 
 </style>
